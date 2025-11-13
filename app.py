@@ -1,28 +1,34 @@
 #"help()" tool gives info on function when placed in ()
 #"".\my_ai_env\Scripts\activate" paste at start of every new terminal for virtual environment(malan did this)
-#Make a function that classifies intent of users text(Basic so no documentation)
-#The 'def' keyword defines the function
 #basic version should have 20-50 lines of python code and 30-55 lines using all of HTML,CSS,JavaScript)
-#create a random variable to set equal to desired input,then "print(variable)" for it to work
+#Document hashtag with "personal:" on top of code section whcih explains purpose so your not confused
 
 
+#personal:chatbot done
 
-
-
+# --- 1. Imports ---
 from flask import Flask, render_template, request, jsonify
-from transformers import pipeline # <-- ADD THIS IMPORT
+from transformers import pipeline
+import spacy # Import spacy
 
 # Create the Flask application instance
 app = Flask(__name__)
 
-# --- LOAD THE TRANSFORMER MODEL ONCE WHEN THE APP STARTS ---
-# This loads a "zero-shot" classification model that can classify text
-# based on labels you provide on the fly.
+# --- 2. Model Loading (Load models once globally) ---
 try:
     classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
 except Exception as e:
     print(f"Error loading transformer model: {e}")
     classifier = None
+
+try:
+    # Load the English spaCy model
+    nlp_spacy = spacy.load("en_core_web_sm")
+except Exception as e:
+    print(f"Error loading spaCy model: {e}")
+    nlp_spacy = None
+
+# --- 3. Routes and Logic (The API endpoint) ---
 
 # Define the default homepage route
 @app.route('/')
@@ -35,18 +41,41 @@ def classify_user_text():
     data = request.get_json()
     user_message = data.get("text", "")
 
+    # Add the responses dictionary here
+    responses = {
+        "greeting": "Hello there! How can I assist you today?",
+        "order_status": "To check your order status, please provide your order ID.",
+        "tech_support": "I can help with tech support. Please describe your issue in detail.",
+        "check_balance": "You can check your balance in your account settings online.",
+        "goodbye": "Goodbye! Have a great day.",
+        "default": "I'm not sure how to respond to that intent."
+    }
+
+    # --- Integrate SpaCy processing here, before classification ---
+    if nlp_spacy and user_message:
+        doc = nlp_spacy(user_message)
+        # The lemmatized words are now accessible via 'token.lemma_' if you need them
+        print([token.lemma_ for token in doc]) # Example of accessing the base forms
+    # --- End SpaCy integration ---
+    
+
     if classifier and user_message:
-        # Define potential intents (you customize these)
-        candidate_labels = ["greeting", "order_status", "tech_support", "check_balance", "goodbye"]
+        # Define potential intents based on the dictionary keys
+        candidate_labels = list(responses.keys())
+        candidate_labels.remove("default") # Don't classify as 'default'
 
         # Run the classification
         result = classifier(user_message, candidate_labels)
-        detected_intent = result['labels'][0]
+        detected_intent = result['labels'][0] # Use [0] to get the top result
         confidence_score = result['scores'][0]
 
-        bot_response = f"Detected intent: **{detected_intent}** with {confidence_score:.2f} confidence."
+        # Get the specific response based on the detected intent
+        bot_response = responses.get(detected_intent, responses["default"])
+        bot_response += f" (Intent: {detected_intent}, Confidence: {confidence_score:.2f})"
+
     else:
-        bot_response = "Model not loaded or no message received."
+        # Handles cases where the model failed to load or no message was sent
+        bot_response = responses["default"]
         detected_intent = "none"
 
     return jsonify({
@@ -54,28 +83,7 @@ def classify_user_text():
         "response": bot_response
     })
 
-
-# Optional: Run the app directly if this script is executed
+# --- 4. Execution Block ---
 if __name__ == '__main__':
     app.run(debug=True)
 
-
-
-
-
-
-#Dont touch this code unless asking gemini!!!
-from flask import Flask, render_template # <-- ADD render_template here
-
-# Create the Flask application instance
-app = Flask(__name__)
-
-# Define the default homepage route
-@app.route('/')
-def hello_world():
-    # return 'Hello World! The AI Chatbot is starting up.' <-- DELETE THIS LINE
-    return render_template('index.html') # <-- ADD THIS LINE INSTEAD
-
-# Optional: Run the app directly if this script is executed
-if __name__ == '__main__':
-    app.run(debug=True)
