@@ -1,11 +1,59 @@
 #"help()" tool gives info on function when placed in ()
 #"".\my_ai_env\Scripts\activate" paste at start of every new terminal for virtual environment(malan did this)
-#basic version should have 20-50 lines of python code and 30-55 lines using all of HTML,CSS,JavaScript)
 #Document hashtag with "personal:" on top of code section whcih explains purpose so your not confused
+#After a while make sure code is sectioned off correctly
+#All main code goes here and all tests go in next file
+#Run "pytest" to see if code is fine and only in test file
+#Gemini doesnt trash memory if chat restarts
+
+#NLP Logic/Model Code (PyTorch/ Transformers/SpaCy): ~300-600 line
+#1.Goal=make robot say "hello (name)"
+#2.Use spacy aka try
+#3.Simple logic,like if sentence says "hello" in it then classify intent as greeting
+#4.Transformers for model and pytorch to define input then run through model
+#5.Write a pytest for each corresponding function
+
+
+
+
+
+#personal:"hello(name)"goal 
+import spacy
+
+# Load the small English model. Ensure you have installed it via:
+# python -m spacy download en_core_web_sm
+try:
+    nlp = spacy.load("en_core_web_sm")
+except OSError:
+    print("Downloading SpaCy model 'en_core_web_sm'. Please wait.")
+    spacy.cli.download("en_core_web_sm")
+    nlp = spacy.load("en_core_web_sm")
+
+def extract_name(user_input: str) -> str | None:
+    """
+    Attempts to extract a person's name from a given string using SpaCy NER.
+    """
+    doc = nlp(user_input)
+    # Iterate over the entities recognized by SpaCy
+    for ent in doc.ents:
+        # 'PERSON' label indicates a name
+        if ent.label_ == "PERSON":
+            return ent.text
+    return None
+
+# Example usage:
+# name = extract_name("Hello, my name is John Doe.")
+# print(name) # Output: John Doe
+
+
+
+
+
+
+
 
 
 #personal:chatbot done
-
 # --- 1. Imports ---
 from flask import Flask, render_template, request, jsonify
 from transformers import pipeline
