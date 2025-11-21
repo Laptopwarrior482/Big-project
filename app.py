@@ -23,19 +23,17 @@
 
 
 
-
-
 import spacy
 from flask import Flask, render_template, request, jsonify
-from transformers import pipeline
+from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch
 
 # Create the Flask application instance
 app = Flask(__name__)
 
 # --- 2. Model Loading (Load models once globally) ---
 
-# Load the small English spaCy model. Ensure you have installed it via:
-# python -m spacy download en_core_web_sm
+# Load the small English spaCy model for name extraction
 try:
     nlp = spacy.load("en_core_web_sm")
 except (OSError, ImportError):
@@ -43,19 +41,22 @@ except (OSError, ImportError):
     spacy.cli.download("en_core_web_sm")
     nlp = spacy.load("en_core_web_sm")
 
+# Load the DialoGPT Conversational Model
 try:
-    # This model classifies intents
-    classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
+    model_name = "microsoft/DialoGPT-small"
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForCausalLM.from_pretrained(model_name)
+    print(f"Loaded DialoGPT model: {model_name}")
 except Exception as e:
-    print(f"Error loading transformer model: {e}")
-    classifier = None
+    print(f"Error loading DialoGPT model: {e}")
+    tokenizer = None
+    model = None
 
 # --- Helper Function ---
 
 def extract_name(user_input: str) -> str | None:
     """
     Attempts to extract a person's name from a given string using SpaCy NER.
-    Runs only if nlp model is loaded correctly.
     """
     if nlp:
         doc = nlp(user_input)
@@ -64,11 +65,50 @@ def extract_name(user_input: str) -> str | None:
                 return ent.text
     return None
 
+def generate_ai_response(user_message, chat_history_ids=None):
+    """
+    Generates a conversational AI response using DialoGPT.
+    """
+    if not tokenizer or not model:
+        return "Sorry, the AI model is not available."
+
+    # Encode the new user input, plus the conversation history if it exists
+    new_input_ids = tokenizer.encode(user_message + tokenizer.eos_token, return_tensors='pt')
+
+    # If we have history, combine the history with the new input
+    bot_input_ids = torch.cat([chat_history_ids, new_input_ids], dim=-1) if chat_history_ids is not None else new_input_ids
+
+    # Generate a response
+    # max_length can be adjusted, but 100 is a good start
+    chat_history_ids = model.generate(
+        bot_input_ids, 
+        max_length=100, 
+        pad_token_id=tokenizer.eos_token_id,
+        no_repeat_ngram_size=3,
+        do_sample=True,
+        top_k=50,
+        top_p=0.9,
+        temperature=0.7
+    )
+
+    # Decode the last response from the bot
+    # We slice the tensor to get only the new part the bot generated
+    bot_response = tokenizer.decode(chat_history_ids[:, bot_input_ids.shape[-1]:][0], skip_special_tokens=True)
+    
+    # Return the response text and the updated history for the next turn
+    return bot_response, chat_history_ids
+
+
 # --- 3. Routes and Logic (The API endpoint) ---
+
+# We need a way to store history across requests (Flask session or a simple dict if single user)
+# For simplicity in this example, history is not implemented in the API view yet, 
+# it's usually handled by the front-end or server session management. 
+# The generate_ai_response function can handle history though!
 
 # Define the default homepage route
 @app.route('/')
-def hello_world():
+def home():
     # You need an 'index.html' file in a 'templates' folder for this to work
     return render_template('index.html')
 
@@ -77,45 +117,21 @@ def hello_world():
 def handle_chat_api():
     data = request.get_json()
     user_message = data.get("text", "")
-
-    responses = {
-        "order_status": "To check your order status, please provide your order ID.",
-        "tech_support": "I can help with tech support. Please describe your issue in detail.",
-        "check_balance": "You can check your balance in your account settings online.",
-        "goodbye": "Goodbye! Have a great day.",
-        "default": "I'm not sure how to respond to that intent."
-    }
     
-    bot_response = responses["default"]
-    detected_intent = "none"
+    # Call the new generative AI function (history management not yet fully integrated here)
+    bot_response, _ = generate_ai_response(user_message)
+    
+    # Use your name extraction logic to customize a potential opening response
+    name = extract_name(user_message)
+    if name and "hello" in bot_response.lower():
+         bot_response = f"Hello, {name}! {bot_response.split('!', 1)[-1].strip()}"
 
-    if classifier and user_message:
-        candidate_labels = list(responses.keys())
-        candidate_labels.remove("default")
-
-        result = classifier(user_message, candidate_labels)
-        detected_intent = result['labels'][0]
-        confidence_score = result['scores'][0]
-        
-        # New Logic: Integrate name extraction if the intent is a greeting
-        if detected_intent == "greeting":
-            name = extract_name(user_message)
-            if name:
-                bot_response = f"Hello, {name}! How can I assist you today?"
-            else:
-                bot_response = "Hello there! How can I assist you today?"
-        else:
-            bot_response = responses.get(detected_intent, responses["default"])
-            
-        bot_response += f" (Intent: {detected_intent}, Confidence: {confidence_score:.2f})"
-        
+    # We return a generic 'AI Response' intent now, as we don't classify specific intents
     return jsonify({
-        "intent": detected_intent,
+        "intent": "AI_Response_Generated",
         "response": bot_response
     })
 
-
-# Note: The manual tests at the bottom were removed as generate_response was deleted.
-# We will use the 'pytest' file for testing going forward.
+# Note: Remember to run with `flask --app app run`
 
 
