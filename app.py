@@ -21,7 +21,6 @@
 #5.Write a pytest for each corresponding function
 
 
-
 import spacy
 from flask import Flask, render_template, request, jsonify, session
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -58,9 +57,7 @@ except Exception as e:
 # --- Helper Function ---
 
 def extract_name(user_input: str) -> str | None:
-    """
-    Attempts to extract a person's name from a given string using SpaCy NER.
-    """
+    # ... (function remains the same) ...
     if nlp:
         doc = nlp(user_input)
         for ent in doc.ents:
@@ -90,11 +87,12 @@ def generate_ai_response(user_message, chat_history_ids=None):
         do_sample=True,
         top_k=50,
         top_p=0.9,
-        temperature=0.7 # Adjust temperature to make responses less repetitive
+        temperature=0.7
     )
 
     # Decode the last response from the bot
-    bot_response = tokenizer.decode(chat_history_ids[:, bot_input_ids.shape[-1]:], skip_special_tokens=True)
+    # We only decode the new part of the conversation, which starts after the previous input length
+    bot_response = tokenizer.decode(chat_history_ids[:, bot_input_ids.shape[-1]:][0], skip_special_tokens=True)
     
     return bot_response, chat_history_ids
 
@@ -103,7 +101,6 @@ def generate_ai_response(user_message, chat_history_ids=None):
 
 @app.route('/')
 def home():
-    # You need an 'index.html' file in a 'templates' folder for this to work
     return render_template('index.html')
 
 @app.route('/api/chat', methods=['POST'])
@@ -111,18 +108,28 @@ def handle_chat_api():
     data = request.get_json()
     user_message = data.get("text", "")
     
-    # Get chat history from the Flask session, if it exists
-    # History is stored as a list of numbers (bytes), so we convert back to a PyTorch tensor
-    chat_history_bytes = session.get('chat_history', None)
-    chat_history_ids = torch.tensor(chat_history_bytes) if chat_history_bytes else None
+    chat_history_ids = None
+
+    # Retrieve history from the Flask session
+    if 'chat_history' in session:
+        # Convert the list of integers back to a PyTorch tensor
+        # CRITICAL FIX: Ensure we reconstruct the tensor in the correct 2D shape (batch_size=1)
+        history_list = session['chat_history']
+        if history_list and isinstance(history_list, list) and isinstance(history_list[0], list):
+             # Handle the nested list structure correctly for the tensor constructor
+            chat_history_ids = torch.tensor(history_list, dtype=torch.long)
+        elif history_list and isinstance(history_list, list) and isinstance(history_list[0], int):
+            # Handle a flat list if your implementation changes later
+            chat_history_ids = torch.tensor([history_list], dtype=torch.long)
+
 
     # Get AI response and updated history
-    bot_response, chat_history_ids = generate_ai_response(user_message, chat_history_ids)
+    bot_response, updated_chat_history_ids = generate_ai_response(user_message, chat_history_ids)
     
     # Save the updated history back to the session for the next request
-    # Convert tensor back to a list/bytes that Flask can save in the session
-    if chat_history_ids is not None:
-        session['chat_history'] = chat_history_ids.tolist()
+    if updated_chat_history_ids is not None:
+        # Convert tensor back to a standard Python list of lists for session storage
+        session['chat_history'] = updated_chat_history_ids.tolist()
     
     # Integrate name extraction for a better greeting
     name = extract_name(user_message)
@@ -133,5 +140,3 @@ def handle_chat_api():
         "intent": "AI_Response_Generated",
         "response": bot_response
     })
-
-# Note: Remember to run with `flask --app app run`
