@@ -1,16 +1,23 @@
-#"help()" tool gives info on function when placed in ()
 #"".\my_ai_env\Scripts\activate" paste at start of every new terminal for virtual environment(malan did this)
 #Document hashtag with "personal:" on top of code section whcih explains purpose so your not confused
-#After a while make sure code is sectioned off correctly
-#All main code goes here and all tests go in next file
-#Run "pytest" to see if code is fine and only in test file
-#Gemini doesnt trash memory if chat restarts
+#Make sure code # titles are correct
+#Main code here and tests in next file
+#Run this to test code"python test_chatbot_api.py"
+#Always ask extra questions b/c to master something you need 10x knowledge
+#KEEP ALL MOST IMPORTANT CODING TIPS NEAR TOP:
+#Tip:Debug every error even then tell ai what you did,highlighting/color coded stuff helps with errors
+#Tip:"View" then ""Terminal"to open terminal without pasting anything and kill often to avoid bugs
+#Tip:"enter" after pasting so code runs without glitches
+#Tip:Press "ctrl"+"s" to save before running code every time
+#Tip:Press "ctrl"+"c" as best way to kill infinite runnning code
+#Tip:Highlight code then press "ctrl"+"/" to turn all lines to comments
+
 
 #NLP Logic/Model Code (PyTorch/ Transformers/SpaCy): ~300-600 line
-#1.Goal=make robot say "hello (name)"
-#2.Use spacy aka try
-#3.Simple logic,like if sentence says "hello" in it then classify intent as greeting
-#4.Transformers for model and pytorch to define input then run through model
+#1(Done).Goal=make robot say "hello (name)"
+#2(Done).Use spacy
+#(Done)3.Simple logic,like if sentence says "hello" in it then classify intent as greeting
+#4().Transformers for model and pytorch to define input then run through model
 #5.Write a pytest for each corresponding function
 
 
@@ -45,6 +52,20 @@ def extract_name(user_input: str) -> str | None:
 # name = extract_name("Hello, my name is John Doe.")
 # print(name) # Output: John Doe
 
+#personal:a classify function that belongs below here
+def generate_response(user_input: str) -> str:
+    """
+    Generates a greeting response using intent and name extraction.
+    """
+    classify_user_text
+    if intent == "greeting":
+        name = extract_name(user_input)
+        if name:
+            return f"Hello, {name}!"
+        else:
+            return "Hello there!"
+    else:
+        return "I am not sure how to respond to that."
 
 
 
@@ -131,7 +152,15 @@ def classify_user_text():
         "response": bot_response
     })
 
-# --- 4. Execution Block ---
-if __name__ == '__main__':
-    app.run(debug=True)
+
+
+#personal:tests the clarification logic and should stay at bottom
+if __name__ == "__main__":
+    test_input_1 = "Hi, my name is Alex"
+    response_1 = generate_response(test_input_1)
+    print(f"Input: '{test_input_1}' -> Response: '{response_1}'")
+
+    test_input_2 = "How are you doing today?"
+    response_2 = generate_response(test_input_2)
+    print(f"Input: '{test_input_2}' -> Response: '{response_2}'")
 

@@ -1,3 +1,9 @@
+#Quick To-Do notes:
+#1."if "intent" ==" is not defined and "generate_response"(user_input)" has a issue i dont know off
+
+
+
+
 import pytest
 import json
 from app import app # Import the Flask app instance from your app.py file
@@ -57,7 +63,7 @@ def test_api_chat_order_status(client):
 
 #personal:test for "hello (name)"
 import pytest
-from nlp_utils import extract_name
+from app import extract_name
 
 def test_extract_name_simple():
     assert extract_name("Hello, my name is Alice") == "Alice"
@@ -71,4 +77,28 @@ def test_extract_name_not_present():
 def test_extract_name_complex_sentence():
     # NER can sometimes be tricky; this tests how well the base model does
     assert extract_name("My friend Sarah and I went to the store.") == "Sarah"
+
+
+
+
+#test for clarifcation logic
+from app import generate_response
+
+def test_generate_greeting_with_name():
+    """
+    Tests that the bot correctly generates a personalized greeting.
+    """
+    user_input = "Hi, my name is Bob"
+    expected_response = "Hello, Bob!"
+    actual_response = generate_response(user_input)
+    assert actual_response == expected_response
+
+def test_generate_generic_greeting():
+    """
+    Tests that the bot generates a generic greeting when no name is found.
+    """
+    user_input = "Hello there! How are you?"
+    expected_response = "Hello there!"
+    actual_response = generate_response(user_input)
+    assert actual_response == expected_response
 
