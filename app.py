@@ -72,16 +72,24 @@ def generate_ai_response(user_message, chat_history_ids=None):
     if not tokenizer or not model:
         return "Sorry, the AI model is not available.", None
 
+    # Define the maximum length the model can handle (DialoGPT small is often 512)
+    MAX_HISTORY_LENGTH = 512 
+
+    # Truncate history if it's getting too long *before* adding the new input
+    if chat_history_ids is not None and chat_history_ids.shape[1] >= MAX_HISTORY_LENGTH:
+        # Keep only the most recent tokens that fit within the max length
+        chat_history_ids = chat_history_ids[:, -MAX_HISTORY_LENGTH + 50:] # Keep recent history + some buffer
+
     # Encode the new user input
     new_input_ids = tokenizer.encode(user_message + tokenizer.eos_token, return_tensors='pt')
 
-    # Concatenate new input with chat history
+    # Concatenate new input with truncated chat history
     bot_input_ids = torch.cat([chat_history_ids, new_input_ids], dim=-1) if chat_history_ids is not None else new_input_ids
 
     # Generate a response
     chat_history_ids = model.generate(
         bot_input_ids, 
-        max_length=100, 
+        max_length=bot_input_ids.shape[-1] + 50, # Set max generation length dynamically
         pad_token_id=tokenizer.eos_token_id,
         no_repeat_ngram_size=3,
         do_sample=True,
@@ -91,8 +99,7 @@ def generate_ai_response(user_message, chat_history_ids=None):
     )
 
     # Decode the last response from the bot
-    # We only decode the new part of the conversation, which starts after the previous input length
-    bot_response = tokenizer.decode(chat_history_ids[:, bot_input_ids.shape[-1]:][0], skip_special_tokens=True)
+    bot_response = tokenizer.decode(chat_history_ids[:, bot_input_ids.shape[-1]:], skip_special_tokens=True)
     
     return bot_response, chat_history_ids
 
