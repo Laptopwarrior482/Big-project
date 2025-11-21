@@ -22,14 +22,17 @@
 
 
 
-
 import spacy
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
+import secrets
 
-# Create the Flask application instance
+# Create the Flask application instance and set a secret key for session management
 app = Flask(__name__)
+# Generate a secure random key for managing sessions (needed for history/memory)
+app.secret_key = secrets.token_hex(16)
+
 
 # --- 2. Model Loading (Load models once globally) ---
 
@@ -67,19 +70,18 @@ def extract_name(user_input: str) -> str | None:
 
 def generate_ai_response(user_message, chat_history_ids=None):
     """
-    Generates a conversational AI response using DialoGPT.
+    Generates a conversational AI response using DialoGPT and manages history tensors.
     """
     if not tokenizer or not model:
-        return "Sorry, the AI model is not available."
+        return "Sorry, the AI model is not available.", None
 
-    # Encode the new user input, plus the conversation history if it exists
+    # Encode the new user input
     new_input_ids = tokenizer.encode(user_message + tokenizer.eos_token, return_tensors='pt')
 
-    # If we have history, combine the history with the new input
+    # Concatenate new input with chat history
     bot_input_ids = torch.cat([chat_history_ids, new_input_ids], dim=-1) if chat_history_ids is not None else new_input_ids
 
     # Generate a response
-    # max_length can be adjusted, but 100 is a good start
     chat_history_ids = model.generate(
         bot_input_ids, 
         max_length=100, 
@@ -88,50 +90,48 @@ def generate_ai_response(user_message, chat_history_ids=None):
         do_sample=True,
         top_k=50,
         top_p=0.9,
-        temperature=0.7
+        temperature=0.7 # Adjust temperature to make responses less repetitive
     )
 
     # Decode the last response from the bot
-    # We slice the tensor to get only the new part the bot generated
-    bot_response = tokenizer.decode(chat_history_ids[:, bot_input_ids.shape[-1]:][0], skip_special_tokens=True)
+    bot_response = tokenizer.decode(chat_history_ids[:, bot_input_ids.shape[-1]:], skip_special_tokens=True)
     
-    # Return the response text and the updated history for the next turn
     return bot_response, chat_history_ids
 
 
 # --- 3. Routes and Logic (The API endpoint) ---
 
-# We need a way to store history across requests (Flask session or a simple dict if single user)
-# For simplicity in this example, history is not implemented in the API view yet, 
-# it's usually handled by the front-end or server session management. 
-# The generate_ai_response function can handle history though!
-
-# Define the default homepage route
 @app.route('/')
 def home():
     # You need an 'index.html' file in a 'templates' folder for this to work
     return render_template('index.html')
 
-# Define a new route for the chatbot API
 @app.route('/api/chat', methods=['POST'])
 def handle_chat_api():
     data = request.get_json()
     user_message = data.get("text", "")
     
-    # Call the new generative AI function (history management not yet fully integrated here)
-    bot_response, _ = generate_ai_response(user_message)
+    # Get chat history from the Flask session, if it exists
+    # History is stored as a list of numbers (bytes), so we convert back to a PyTorch tensor
+    chat_history_bytes = session.get('chat_history', None)
+    chat_history_ids = torch.tensor(chat_history_bytes) if chat_history_bytes else None
+
+    # Get AI response and updated history
+    bot_response, chat_history_ids = generate_ai_response(user_message, chat_history_ids)
     
-    # Use your name extraction logic to customize a potential opening response
+    # Save the updated history back to the session for the next request
+    # Convert tensor back to a list/bytes that Flask can save in the session
+    if chat_history_ids is not None:
+        session['chat_history'] = chat_history_ids.tolist()
+    
+    # Integrate name extraction for a better greeting
     name = extract_name(user_message)
     if name and "hello" in bot_response.lower():
          bot_response = f"Hello, {name}! {bot_response.split('!', 1)[-1].strip()}"
 
-    # We return a generic 'AI Response' intent now, as we don't classify specific intents
     return jsonify({
         "intent": "AI_Response_Generated",
         "response": bot_response
     })
 
 # Note: Remember to run with `flask --app app run`
-
-
