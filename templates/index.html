@@ -1,15 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>AI Chatbot</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot (DialoGPT-Small)</title>
+    <!-- We can add CSS later, for now, we focus on structure -->
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 20px auto; padding: 0 10px; }
+        #chatbox { border: 1px solid #ccc; padding: 10px; height: 400px; overflow-y: scroll; margin-bottom: 10px; }
+        .message { margin-bottom: 5px; }
+        .user-message { color: blue; text-align: right; }
+        .bot-message { color: green; }
+        #user-input { width: calc(100% - 70px); padding: 8px; }
+        #send-btn { padding: 8px; width: 60px; }
+    </style>
 </head>
 <body>
-    <h1>Welcome to the AI Chatbot</h1>
-    <p>Type your message below and press Send.</p>
-    
-    <form action="/chat" method="POST">
-        <input type="text" name="user_input" placeholder="Enter your message">
-        <button type="submit">Send</button>
-    </form>
+    <h1>AI Chatbot</h1>
+    <div id="chatbox">
+        <!-- Messages will appear here -->
+        <div class="message bot-message">Hello! How can I help you today?</div>
+    </div>
+    <input type="text" id="user-input" placeholder="Type your message...">
+    <button id="send-btn">Send</button>
+
+    <!-- Link the JavaScript file -->
+    <script src="/static/js/chat.js"></script>
 </body>
 </html>
