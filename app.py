@@ -1,3 +1,4 @@
+###PERSONAL TIPS FOR CODING
 #"".\my_ai_env\Scripts\activate" paste at start of every new terminal for virtual environment(malan did this)
 #Document hashtag with "personal:" on top of code section whcih explains purpose so your not confused
 #Make sure code # titles are correct
@@ -14,12 +15,23 @@
 #Tip:Highlight code then press "ctrl"+"/" to turn all lines to comments
 
 
-#NLP Logic/Model Code (PyTorch/ Transformers/SpaCy): ~300-600 line
-#1(Done).Goal=make robot say "hello (name)"
-#2(Done).Use spacy
-#(Done)3.Simple logic,like if sentence says "hello" in it then classify intent as greeting
-#4().Transformers for model and pytorch to define input then run through model
-#5.Write a pytest for each corresponding function
+
+    #DO DOCSTRINGS LIKE THIS B/C ITS"STANDARD GOOGLE STYLE"/"""MUST ALIGN W/ START OF FUNCTION
+    #"""
+    # 
+
+    # After 1 line summary explain more detailed logic if needed (optional).
+
+    # Args:
+        # 
+
+    # Returns:
+        # 
+    #"""
+
+
+
+
 import spacy
 import secrets
 import json
@@ -59,7 +71,16 @@ except Exception as e:
 # --- Helper Functions ---
 
 def extract_name(user_input: str) -> str | None:
-    """Extracts a potential person's name from user input using spaCy."""
+    """
+    Extracts a potential person's name from a given user input string using spaCy.
+
+    Args:
+        user_input: The string provided by the user that needs to be analyzed for a name.
+
+    Returns:
+        str or None: The string name of the user, or None if no name is found.
+    """
+
     if nlp:
         doc = nlp(user_input)
         for ent in doc.ents:
@@ -69,7 +90,18 @@ def extract_name(user_input: str) -> str | None:
 
 def handle_specific_intents(user_message: str) -> str | None:
     """
-    Checks for specific user queries (like "what is a sub?") and provides a predefined response.
+    Checks user input against predefined rules to provide specific, non-AI responses.
+
+    This function intercepts specific phrases (like "what is a sub?") and provides 
+    a hardcoded, intelligent response to prevent the general AI model from generating 
+    a quirky response based on its training data.
+
+    Args:
+        user_message: The current text input from the user.
+
+    Returns:
+        str or None: A predefined response string if a match is found, 
+                     otherwise None to allow the AI model to handle the request.
     """
     message_lower = user_message.lower()
 
@@ -86,7 +118,18 @@ def handle_specific_intents(user_message: str) -> str | None:
 def generate_ai_response(user_message, chat_history_ids=None):
     """
     Generates a conversational AI response using DialoGPT and manages history tensors.
+
+    Args:
+        user_message: The current text input from the user (a string).
+        chat_history_ids: A PyTorch tensor or list containing previous conversation 
+                      history tokens, or None if starting a new chat session.
+
+    Returns:
+    tuple[str, torch.Tensor or None]: A tuple containing the bot response text 
+                                      (string) and the full updated history tensor 
+                                      (torch.Tensor), or None if the model failed to load.
     """
+
     if not tokenizer or not model:
         return "Sorry, the AI model is not available.", None
 
@@ -132,12 +175,22 @@ def generate_ai_response(user_message, chat_history_ids=None):
 def index():
     """
     Renders the main chatbot interface HTML page.
+        str: The rendered HTML content of the 'index.html' template.
     """
     return render_template('index.html')
 
-
 @app.route('/api/chat', methods=['POST'])
 def handle_chat_api():
+    """
+    Handles the main API logic for the chatbot.
+
+    Processes incoming user messages, checks for specific intents, manages 
+    conversation history via Flask sessions, generates an AI response, and 
+    returns a structured JSON object.
+
+    Returns:
+        jsonify: A JSON response containing the chatbot's reply and the intent type.
+    """
     data = request.get_json()
     user_message = data.get("text", "")
     
