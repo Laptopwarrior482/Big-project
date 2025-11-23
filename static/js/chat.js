@@ -42,10 +42,17 @@ document.addEventListener('DOMContentLoaded', () => {
             appendMessage("Error: Could not reach the server.", 'bot-message error');
         });
     }
+// ... (rest of the code above this line is the same) ...
 
     function appendMessage(message, className) {
         const messageDiv = document.createElement('div');
-        messageDiv.classList.add('message', className);
+        messageDiv.classList.add('message'); // Add 'message' first
+        
+        // CRITICAL FIX: Split the incoming classes and add them individually
+        className.split(' ').forEach(cls => {
+            messageDiv.classList.add(cls);
+        });
+
         messageDiv.textContent = message;
         chatbox.appendChild(messageDiv);
         // Scroll to the bottom of the chatbox
