@@ -16,7 +16,7 @@
 
 
 
-    #DO DOCSTRINGS LIKE THIS B/C ITS"STANDARD GOOGLE STYLE"/"""MUST ALIGN W/ START OF FUNCTION
+    #DO DOCSTRINGS LIKE THIS B/C ITS "STANDARD GOOGLE STYLE" & """MUST ALIGN W/ START OF FUNCTION
     #"""
     # 
 
@@ -28,7 +28,6 @@
     # Returns:
         # 
     #"""
-
 
 
 

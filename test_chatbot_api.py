@@ -1,8 +1,3 @@
-#Quick To-Do notes:
-#1."if "intent" ==" is not defined and "generate_response"(user_input)" has a issue i dont know off
-
-
-
 import pytest
 import json
 # Import the Flask app instance from your app.py file
