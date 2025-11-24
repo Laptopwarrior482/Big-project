@@ -1,4 +1,4 @@
-Advanced Python AI Chatbot:
+ADVANCED PYTHON CHATBOT
 
 This project is an Advanced Python AI Chatbot, implemented as a Flask web application that leverages sophisticated Natural Language Processing (NLP) models to facilitate engaging and context-aware conversations.The core of the application is a Flask API that manages conversation state using session cookies. It integrates specialized libraries for enhanced functionality:
 
@@ -9,7 +9,7 @@ This project is an Advanced Python AI Chatbot, implemented as a Flask web applic
 3.Intent Handling: The application combines generative AI with rule-based logic to handle specific, predefined user queries accurately and consistently.
 
 
-Installation:
+INSTALLATION:
 To set up the environment, it is highly recommended to use a Python virtual environment.
 
 1.Create and Activate a Virtual Environment:
@@ -26,7 +26,7 @@ To set up the environment, it is highly recommended to use a Python virtual envi
 "python -m spacy download en_core_web_sm"
 
 
-Usage:
+USAGE:
 The chatbot runs as a local Flask web server.
 1.Run the Flask App: Ensure you are in your activated virtual environment and execute the following command:
 
@@ -35,7 +35,8 @@ The chatbot runs as a local Flask web server.
 2.Access the Interface: Open your web browser and navigate to the provided local address, typically http://127.0.0.1:5000, to interact with the chatbot interface (index.html).
 
 
-Testing:
+
+TESTING:
 Testing ensures code integrity, functionality, and consistent adherence to standards.
 Run Unit/Integration Tests: The project uses pytest for testing the API endpoints and helper functions. Run this command in a new, separate terminal (while the Flask app is running in the first one):
 
@@ -47,7 +48,7 @@ Run Unit/Integration Tests: The project uses pytest for testing the API endpoint
 "python test_chatbot_api.py"
 
 
-Code Standards:
+CODE STANDARDS:
 The project maintains high code quality using automatic tools:
 Black: An uncompromising code formatter used to ensure consistent, clean Python syntax across the project.
 Flake8: A static analysis tool used as a linter, enforcing style guides and highlighting potential errors or standards boundaries crossed within the codebase.
