@@ -2,15 +2,16 @@ Advanced Python AI Chatbot:
 
 This project is an Advanced Python AI Chatbot, implemented as a Flask web application that leverages sophisticated Natural Language Processing (NLP) models to facilitate engaging and context-aware conversations.The core of the application is a Flask API that manages conversation state using session cookies. It integrates specialized libraries for enhanced functionality:
 
-*transformers (DialoGPT): Generates human-like, contextually relevant conversational responses.
+1.transformers (DialoGPT): Generates human-like, contextually relevant conversational responses.
 
-*spaCy: Used for named entity recognition (NER), specifically to extract and manage user information like names.
+2.spaCy: Used for named entity recognition (NER), specifically to extract and manage user information like names.
 
-*Intent Handling: The application combines generative AI with rule-based logic to handle specific, predefined user queries accurately and consistently.
+3.Intent Handling: The application combines generative AI with rule-based logic to handle specific, predefined user queries accurately and consistently.
 
 
 Installation:
 To set up the environment, it is highly recommended to use a Python virtual environment.
+
 1.Create and Activate a Virtual Environment:
 
 "python -m venv my_ai_env"
