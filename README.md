@@ -19,9 +19,11 @@ To set up the environment, it is highly recommended to use a Python virtual envi
 ".\my_ai_env\Scripts\activate"
 # On macOS/Linux:
 "source my_ai_env/bin/activate"
+
 2.Install Dependencies: Install the required libraries listed in your requirements.txt file (or install them directly):
 
 "pip install numpy torch transformers flask pytest black flake8 spacy"
+
 # After installing spacy, download the necessary model data:
 "python -m spacy download en_core_web_sm"
 
