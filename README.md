@@ -10,22 +10,22 @@ This project is an Advanced Python AI Chatbot, implemented as a Flask web applic
 
 
 Installation:
-
 To set up the environment, it is highly recommended to use a Python virtual environment.
 1.Create and Activate a Virtual Environment:
+
 "python -m venv my_ai_env"
 # On Windows:
 ".\my_ai_env\Scripts\activate"
 # On macOS/Linux:
 "source my_ai_env/bin/activate"
 2.Install Dependencies: Install the required libraries listed in your requirements.txt file (or install them directly):
+
 "pip install numpy torch transformers flask pytest black flake8 spacy"
 # After installing spacy, download the necessary model data:
 "python -m spacy download en_core_web_sm"
 
 
 Usage:
-
 The chatbot runs as a local Flask web server.
 1.Run the Flask App: Ensure you are in your activated virtual environment and execute the following command:
 
@@ -35,7 +35,6 @@ The chatbot runs as a local Flask web server.
 
 
 Testing:
-
 Testing ensures code integrity, functionality, and consistent adherence to standards.
 Run Unit/Integration Tests: The project uses pytest for testing the API endpoints and helper functions. Run this command in a new, separate terminal (while the Flask app is running in the first one):
 
@@ -48,7 +47,6 @@ Run Unit/Integration Tests: The project uses pytest for testing the API endpoint
 
 
 Code Standards:
-
 The project maintains high code quality using automatic tools:
 Black: An uncompromising code formatter used to ensure consistent, clean Python syntax across the project.
 Flake8: A static analysis tool used as a linter, enforcing style guides and highlighting potential errors or standards boundaries crossed within the codebase.
