@@ -1,8 +1,11 @@
 Advanced Python AI Chatbot:
 
 This project is an Advanced Python AI Chatbot, implemented as a Flask web application that leverages sophisticated Natural Language Processing (NLP) models to facilitate engaging and context-aware conversations.The core of the application is a Flask API that manages conversation state using session cookies. It integrates specialized libraries for enhanced functionality:
+
 *transformers (DialoGPT): Generates human-like, contextually relevant conversational responses.
+
 *spaCy: Used for named entity recognition (NER), specifically to extract and manage user information like names.
+
 *Intent Handling: The application combines generative AI with rule-based logic to handle specific, predefined user queries accurately and consistently.
 
 
@@ -25,16 +28,22 @@ Usage:
 
 The chatbot runs as a local Flask web server.
 1.Run the Flask App: Ensure you are in your activated virtual environment and execute the following command:
+
 "flask --app app run"
+
 2.Access the Interface: Open your web browser and navigate to the provided local address, typically http://127.0.0.1:5000, to interact with the chatbot interface (index.html).
 
 
 Testing:
 
 Testing ensures code integrity, functionality, and consistent adherence to standards.
-Run Unit/Integration Tests: The project uses pytest for testing the API endpoints and helper functions. Run this command in a new, separate terminal (while the Flask app is running in the first one):"pytest"
+Run Unit/Integration Tests: The project uses pytest for testing the API endpoints and helper functions. Run this command in a new, separate terminal (while the Flask app is running in the first one):
+
+"pytest"
+
 1.Green output indicates all tests passed successfully; Red output indicates a failure in one or more test cases.
 2.Run a Conversation Test Script: The provided test_chatbot_api.py script simulates a multi-turn conversation via HTTP requests to verify session management and memory capabilities.
+
 "python test_chatbot_api.py"
 
 
