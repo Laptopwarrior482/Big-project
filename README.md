@@ -18,7 +18,7 @@ To set up the environment, it is highly recommended to use a Python virtual envi
 2.Install Dependencies: Install the required libraries listed in your requirements.txt file (or install them directly):
 "pip install numpy torch transformers flask pytest black flake8 spacy"
 # After installing spacy, download the necessary model data:
-python -m spacy download en_core_web_sm
+"python -m spacy download en_core_web_sm"
 
 
 Usage:
@@ -32,7 +32,7 @@ The chatbot runs as a local Flask web server.
 Testing:
 
 Testing ensures code integrity, functionality, and consistent adherence to standards.
-1.Run Unit/Integration Tests: The project uses pytest for testing the API endpoints and helper functions. Run this command in a new, separate terminal (while the Flask app is running in the first one):"pytest"
+Run Unit/Integration Tests: The project uses pytest for testing the API endpoints and helper functions. Run this command in a new, separate terminal (while the Flask app is running in the first one):"pytest"
 1.Green output indicates all tests passed successfully; Red output indicates a failure in one or more test cases.
 2.Run a Conversation Test Script: The provided test_chatbot_api.py script simulates a multi-turn conversation via HTTP requests to verify session management and memory capabilities.
 "python test_chatbot_api.py"
